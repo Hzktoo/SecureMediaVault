@@ -1,0 +1,23 @@
+http:
+  middlewares:
+    security-headers:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "no-referrer"
+        permissionsPolicy: "geolocation=(), microphone=(), camera=()"
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+
+    rate-limit:
+      rateLimit:
+        average: 50
+        burst: 100
+
+    forwarded-proto:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"

@@ -1,0 +1,6 @@
+@SecureMediaVault.Api_HostAddress = http://localhost:5296
+
+GET {{SecureMediaVault.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

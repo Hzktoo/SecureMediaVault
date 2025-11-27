@@ -1,0 +1,10 @@
+tls:
+  options:
+    strict-tls:
+      minVersion: VersionTLS13
+
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/cert.pem
+        keyFile: /certs/key.pem

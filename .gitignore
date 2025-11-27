@@ -1,0 +1,28 @@
+
+.env
+/secrets/
+/certs/
+
+# --- .NET / C# (BUILD ARTIFACTS) ---
+bin/
+obj/
+
+*.user
+*.suo
+*.sln.doc
+*.cache
+*.log
+Properties/launchSettings.json
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- IDE ---
+.vscode/
+.vs/
+.idea/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db
