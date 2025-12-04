@@ -46,7 +46,7 @@ public class MediaController : ControllerBase
         var encryptedDek = _crypto.EncryptDek(dek);
 
         var mediaId = Guid.NewGuid();
-        var storageKey = $"{userId}/{mediaId}"; 
+        var storageKey = $"{userId}/{mediaId}";
 
         var mediaObject = new MediaObject
         {
@@ -56,20 +56,34 @@ public class MediaController : ControllerBase
             ContentType = file.ContentType,
             FileSize = file.Length,
             StorageKey = storageKey,
-            EncryptedDek = encryptedDek, 
+            EncryptedDek = encryptedDek,
             CreatedAt = DateTime.UtcNow
         };
 
-        using var encryptedStream = new MemoryStream();
+        var tempFilePath = Path.GetTempFileName();
 
-        await using (var inputStream = file.OpenReadStream())
+        try
         {
-            await _crypto.EncryptStreamAsync(inputStream, encryptedStream, dek);
+            using (var fileStream = System.IO.File.Create(tempFilePath))
+            {
+                await using (var inputStream = file.OpenReadStream())
+                {
+                    await _crypto.EncryptStreamAsync(inputStream, fileStream, dek);
+                }
+            }
+
+            using (var uploadStream = System.IO.File.OpenRead(tempFilePath))
+            {
+                await _storage.UploadFileAsync(storageKey, uploadStream);
+            }
         }
-
-        encryptedStream.Position = 0;
-
-        await _storage.UploadFileAsync(storageKey, encryptedStream);
+        finally
+        {
+            if (System.IO.File.Exists(tempFilePath))
+            {
+                System.IO.File.Delete(tempFilePath);
+            }
+        }
 
         _db.MediaObjects.Add(mediaObject);
         await _db.SaveChangesAsync();
