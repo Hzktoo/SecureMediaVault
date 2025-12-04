@@ -53,4 +53,15 @@ public class S3StorageService : IStorageService
         var response = await _s3Client.GetObjectAsync(request);
         return response.ResponseStream;
     }
+
+    public async Task DeleteFileAsync(string key)
+    {
+        var request = new DeleteObjectRequest
+        {
+            BucketName = _minioSettings.BucketName,
+            Key = key
+        };
+
+        await _s3Client.DeleteObjectAsync(request);
+    }
 }

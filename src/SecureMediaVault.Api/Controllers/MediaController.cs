@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using SecureMediaVault.Api.Data;
 using SecureMediaVault.Api.Data.Entities;
 using SecureMediaVault.Api.Services;
+using Serilog;
 
 namespace SecureMediaVault.Api.Controllers;
 
@@ -141,5 +142,27 @@ public class MediaController : ControllerBase
             .ToList();
 
         return Ok(files);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = Guid.Parse(userIdString!);
+
+        var mediaObject = await _db.MediaObjects.FindAsync(id);
+
+        if (mediaObject == null) return NotFound();
+
+        if (mediaObject.AppUserId != userId) return Forbid();
+
+        await _storage.DeleteFileAsync(mediaObject.StorageKey);
+
+        _db.MediaObjects.Remove(mediaObject);
+        await _db.SaveChangesAsync();
+
+        Log.Information("User {UserId} deleted file {FileName}", userId, mediaObject.FileName);
+
+        return NoContent();
     }
 }
